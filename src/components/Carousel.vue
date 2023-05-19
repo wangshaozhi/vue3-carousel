@@ -1,48 +1,99 @@
 <script setup lang="ts">
-import {reactive, onMounted, toRefs, defineProps} from 'vue';
+import {reactive, onMounted, toRefs, defineProps, CSSProperties, computed} from 'vue';
+interface IState {
+    imageList: string[];
+    imageWrapperStyle: CSSProperties;
+};
 
-const state: {imageList: string[]} = reactive({
+const state: IState = reactive({
     imageList: [
-    'https://p6.qhimg.com/bdr/__85/t01384e4540636d2f40.jpg',
-    'https://p6.qhimg.com/bdr/__85/t017999da786a85433b.jpg',
-    'https://p0.qhimg.com/bdr/__85/t01bfba0fc70ae2812f.jpg'
-]
+        'https://p6.qhimg.com/bdr/__85/t01384e4540636d2f40.jpg',
+        'https://p6.qhimg.com/bdr/__85/t017999da786a85433b.jpg',
+        'https://p0.qhimg.com/bdr/__85/t01bfba0fc70ae2812f.jpg'
+    ],
+    imageWrapperStyle: {background: 'red'}
 });
-
 const {imageList} = toRefs(state);
 
 onMounted(() => {
-    const firstImage = state.imageList[0];
-    const lastImage = state.imageList[state.imageList.length - 1];
-    state.imageList = [lastImage, ...state.imageList, firstImage];
-    console.log('mounted')
-    console.log(imageList)
+    /**
+     * 初始化图片列表
+     */
+    const initImageList = () => {
+        const firstImage = state.imageList[0];
+        const lastImage = state.imageList[state.imageList.length - 1];
+        state.imageList = [lastImage, ...state.imageList, firstImage];
+    };
+    
+    initImageList();
 });
 
-defineProps<{msg: string}>()
+const onDotClick = (index: number) => {
+    state.imageWrapperStyle = {
+        transform: `translateX(${-100 * index})%`
+    };
+};
+
+defineProps<{msg: string}>();
+
 </script>
 
 <template>
     <h2>{{ msg }}</h2>
     <div class="carousel-wrapper">
-        <div>
-            <div v-for="item in imageList" :key="item">
-                <img
-                    :src="item"
-                    class="image"
-                />
-            </div>
+        <div
+            class="image-wrapper"
+            :style="state.imageWrapperStyle"
+        >
+            <img
+                v-for="item in imageList"
+                :key="item"
+                :src="item"
+                class="image"
+            />
         </div>
         <div class="indicator-wrapper">
-            <div v-for="url in imageList" :key="url">
-                <span>{{url}}</span>
-            </div>
+            <span
+                v-for="idx in imageList.map((_, index) => index)"
+                :key="idx"
+                class="dot"
+                @click="() => onDotClick(idx)"
+            >
+            </span>
         </div>
+        {{ state.imageWrapperStyle }}
     </div>
 </template>
 
 <style scoped>
+
+.carousel-wrapper {
+    position: relative;
+    width: 500px;
+}
+
+.image-wrapper {
+    display: flex;
+}
+
 .image {
-    width: 100%;
+    width: 500px;
+}
+
+.indicator-wrapper {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    display: flex;
+    transform: translateX(-50%);
+}
+
+.dot {
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+    border-radius: 50%;
+    border: 1px solid #ccc;
+    cursor: pointer;
 }
 </style>
