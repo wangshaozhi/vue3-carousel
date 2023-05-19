@@ -2,7 +2,8 @@
 import {reactive, onMounted, toRefs, defineProps, CSSProperties, computed} from 'vue';
 interface IState {
     imageList: string[];
-    imageWrapperStyle: CSSProperties;
+    imageWrapperStyle: string;
+    currActiveIndex: number;
 };
 
 const state: IState = reactive({
@@ -11,7 +12,8 @@ const state: IState = reactive({
         'https://p6.qhimg.com/bdr/__85/t017999da786a85433b.jpg',
         'https://p0.qhimg.com/bdr/__85/t01bfba0fc70ae2812f.jpg'
     ],
-    imageWrapperStyle: {background: 'red'}
+    imageWrapperStyle: 'translateX(0)',
+    currActiveIndex: 0
 });
 const {imageList} = toRefs(state);
 
@@ -29,9 +31,8 @@ onMounted(() => {
 });
 
 const onDotClick = (index: number) => {
-    state.imageWrapperStyle = {
-        transform: `translateX(${-100 * index})%`
-    };
+    state.currActiveIndex = index;
+    state.imageWrapperStyle = `translateX(${-100 * index}%)`;
 };
 
 defineProps<{msg: string}>();
@@ -43,7 +44,6 @@ defineProps<{msg: string}>();
     <div class="carousel-wrapper">
         <div
             class="image-wrapper"
-            :style="state.imageWrapperStyle"
         >
             <img
                 v-for="item in imageList"
@@ -56,12 +56,11 @@ defineProps<{msg: string}>();
             <span
                 v-for="idx in imageList.map((_, index) => index)"
                 :key="idx"
-                class="dot"
+                :class="{active: state.currActiveIndex === idx, 'dot': true}"
                 @click="() => onDotClick(idx)"
             >
             </span>
         </div>
-        {{ state.imageWrapperStyle }}
     </div>
 </template>
 
@@ -74,6 +73,8 @@ defineProps<{msg: string}>();
 
 .image-wrapper {
     display: flex;
+    transform: v-bind(state.imageWrapperStyle);
+    transition: transform .5s;
 }
 
 .image {
@@ -95,5 +96,10 @@ defineProps<{msg: string}>();
     border-radius: 50%;
     border: 1px solid #ccc;
     cursor: pointer;
+}
+
+.active {
+    background-color: #fff;
+    border: 1px solid #fff;
 }
 </style>
